@@ -207,44 +207,39 @@ class WebServer {
           String queryParam1 = "";
           String queryParam2 = "";
 
-          boolean clearChecks = true;
-
           if(query_pairs.containsKey("num1")) queryParam1 = query_pairs.get("num1");
           else{
-            clearChecks = false;
             ReturnErrorForMultiply(builder, false);
+            return builder.toString().getBytes();
           }
 
           if(query_pairs.containsKey("num2")) queryParam2 = query_pairs.get("num2");
           else {
-            clearChecks = false;
             ReturnErrorForMultiply(builder, false);
+            return builder.toString().getBytes();
           }
 
             // extract required fields from parameters
           if(CheckIfStringIsANumber(queryParam1)) num1 = Integer.parseInt(query_pairs.get("num1"));
           else {
-            clearChecks = false;
             ReturnErrorForMultiply(builder, true);
+            return builder.toString().getBytes();
           }
 
           if(CheckIfStringIsANumber(queryParam2)) num2 = Integer.parseInt(query_pairs.get("num2"));
           else {
-            clearChecks = false;
             ReturnErrorForMultiply(builder, true);
+            return builder.toString().getBytes();
           }
 
-          if(clearChecks){
-            // do math
-            Integer result = num1 * num2;
+          // do math
+          Integer result = num1 * num2;
 
-            // Generate response
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Result is: " + result);
-
-          }
+          // Generate response
+          builder.append("HTTP/1.1 200 OK\n");
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+          builder.append("Result is: " + result);
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
           // check out https://docs.github.com/rest/reference/
@@ -403,16 +398,16 @@ class WebServer {
   }
 
   private void ReturnErrorForMultiply(StringBuilder builder, boolean doesExist){
-    if(!doesExist){
+    if(doesExist){
       // Generate response
-      builder.append("HTTP/1.1 200 OK\n");
+      builder.append("HTTP/1.1 400 Bad Result\n");
       builder.append("Content-Type: text/html; charset=utf-8\n");
       builder.append("\n");
-      builder.append("Result is: Both num1 and num2 query params are required!");
+      builder.append("Result is: Parameters are invalid");
     }
     else{
       // Generate response
-      builder.append("HTTP/1.1 200 OK\n");
+      builder.append("HTTP/1.1 400 Bad Result\n");
       builder.append("Content-Type: text/html; charset=utf-8\n");
       builder.append("\n");
       builder.append("Result is: Both num1 and num2 query params are required! (ex: ?num1=9&num2=5)");
