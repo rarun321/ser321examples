@@ -204,25 +204,47 @@ class WebServer {
           Integer num1 = 0;
           Integer num2 = 0;
 
-          // extract required fields from parameters
-          if(CheckIfStringIsANumber(query_pairs.get("num1"))) num1 = Integer.parseInt(query_pairs.get("num1"));
-          else ReturnErrorForMultiply(builder);
+          String queryParam1 = "";
+          String queryParam2 = "";
 
-          if(CheckIfStringIsANumber(query_pairs.get("num2"))) num2 = Integer.parseInt(query_pairs.get("num2"));
-          else ReturnErrorForMultiply(builder);
+          boolean clearChecks = true;
 
-          // do math
-          Integer result = num1 * num2;
+          if(query_pairs.containsKey("num1")) queryParam1 = query_pairs.get("num1");
+          else{
+            clearChecks = false;
+            ReturnErrorForMultiply(builder, false);
+          }
 
-          // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
+          if(query_pairs.containsKey("num2")) queryParam2 = query_pairs.get("num2");
+          else {
+            clearChecks = false;
+            ReturnErrorForMultiply(builder, false);
+          }
 
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+            // extract required fields from parameters
+          if(CheckIfStringIsANumber(queryParam1)) num1 = Integer.parseInt(query_pairs.get("num1"));
+          else {
+            clearChecks = false;
+            ReturnErrorForMultiply(builder, true);
+          }
 
+          if(CheckIfStringIsANumber(queryParam2)) num2 = Integer.parseInt(query_pairs.get("num2"));
+          else {
+            clearChecks = false;
+            ReturnErrorForMultiply(builder, true);
+          }
+
+          if(clearChecks){
+            // do math
+            Integer result = num1 * num2;
+
+            // Generate response
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Result is: " + result);
+
+          }
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
           // check out https://docs.github.com/rest/reference/
@@ -380,11 +402,20 @@ class WebServer {
     }
   }
 
-  private void ReturnErrorForMultiply(StringBuilder builder){
-    // Generate response
-    builder.append("HTTP/1.1 200 OK\n");
-    builder.append("Content-Type: text/html; charset=utf-8\n");
-    builder.append("\n");
-    builder.append("Result is: Invalid parameters!");
+  private void ReturnErrorForMultiply(StringBuilder builder, boolean doesExist){
+    if(!doesExist){
+      // Generate response
+      builder.append("HTTP/1.1 200 OK\n");
+      builder.append("Content-Type: text/html; charset=utf-8\n");
+      builder.append("\n");
+      builder.append("Result is: Both num1 and num2 query params are required!");
+    }
+    else{
+      // Generate response
+      builder.append("HTTP/1.1 200 OK\n");
+      builder.append("Content-Type: text/html; charset=utf-8\n");
+      builder.append("\n");
+      builder.append("Result is: Both num1 and num2 query params are required! (ex: ?num1=9&num2=5)");
+    }
   }
 }
