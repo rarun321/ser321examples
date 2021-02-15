@@ -16,14 +16,12 @@ write a response back
 
 package funHttpServer;
 
+import org.json.JSONArray;
+
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.nio.charset.Charset;
 
 class WebServer {
@@ -201,12 +199,13 @@ class WebServer {
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
 
-          Integer num1 = 0;
-          Integer num2 = 0;
+          Integer num1;
+          Integer num2;
 
-          String queryParam1 = "";
-          String queryParam2 = "";
+          String queryParam1;
+          String queryParam2;
 
+          //Checks
           if(query_pairs.containsKey("num1")) queryParam1 = query_pairs.get("num1");
           else{
             ReturnErrorForMultiply(builder, false);
@@ -219,7 +218,6 @@ class WebServer {
             return builder.toString().getBytes();
           }
 
-            // extract required fields from parameters
           if(CheckIfStringIsANumber(queryParam1)) num1 = Integer.parseInt(query_pairs.get("num1"));
           else {
             ReturnErrorForMultiply(builder, true);
@@ -252,15 +250,18 @@ class WebServer {
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           query_pairs = splitQuery(request.replace("github?", ""));
           String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
 
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response
-          // and list the owner name, owner id and name of the public repo on your webpage, e.g.
-          // amehlhase, 46384989 -> memoranda
-          // amehlhase, 46384989 -> ser316examples
-          // amehlhase, 46384989 -> test316
+          String responseMessage = "";
+
+          JSONArray array = new JSONArray(json);
+          for(int i = 0; i < array.length(); i++){
+            responseMessage += "Id:" + array.getJSONObject(i).get("id") + " Repo Name:" + array.getJSONObject(i).get("name") + " Repo Owner:" + array.getJSONObject(i).getJSONObject("owner").get("login") + "\n";
+          }
+
+          builder.append("HTTP/1.1 200 OK\n");
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+          builder.append("Result is: " + responseMessage);
 
         } else {
           // if the request is not recognized at all
@@ -407,7 +408,7 @@ class WebServer {
     }
     else{
       // Generate response
-      builder.append("HTTP/1.1 400 Bad Result\n");
+      builder.append("HTTP/1.1 422 Unprocessable Entity\n");
       builder.append("Content-Type: text/html; charset=utf-8\n");
       builder.append("\n");
       builder.append("Result is: Both num1 and num2 query params are required! (ex: ?num1=9&num2=5)");
