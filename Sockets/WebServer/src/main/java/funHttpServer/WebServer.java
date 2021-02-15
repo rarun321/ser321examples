@@ -201,9 +201,15 @@ class WebServer {
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
 
+          Integer num1 = 0;
+          Integer num2 = 0;
+
           // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+          if(CheckIfStringIsANumber(query_pairs.get("num1"))) num1 = Integer.parseInt(query_pairs.get("num1"));
+          else ReturnErrorForMultiply(builder);
+
+          if(CheckIfStringIsANumber(query_pairs.get("num2"))) num2 = Integer.parseInt(query_pairs.get("num2"));
+          else ReturnErrorForMultiply(builder);
 
           // do math
           Integer result = num1 * num2;
@@ -362,5 +368,23 @@ class WebServer {
       System.out.println("Exception in url request:" + ex.getMessage());
     }
     return sb.toString();
+  }
+
+  private boolean CheckIfStringIsANumber(String s){
+    try{
+      Integer x = Integer.parseInt(s);
+      return true;
+    }
+    catch (Exception e){
+      return false;
+    }
+  }
+
+  private void ReturnErrorForMultiply(StringBuilder builder){
+    // Generate response
+    builder.append("HTTP/1.1 200 OK\n");
+    builder.append("Content-Type: text/html; charset=utf-8\n");
+    builder.append("\n");
+    builder.append("Result is: Invalid parameters!");
   }
 }
